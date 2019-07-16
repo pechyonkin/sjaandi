@@ -3,7 +3,20 @@ sjaandi
 
  Library for visualizing and understanding predictions of convolutional neural networks.
 
-Project Organization
+
+## Getting the Data
+
+Download [Imagenette-160]() using the following shell command:
+
+```python
+python src/data/get_imagenette.py
+```
+
+The data will be available in `data/raw/imagenette-160/`.
+
+
+## Project Organization
+
 ------------
 
     ├── LICENSE
