@@ -1,14 +1,11 @@
 from fastai.vision import *
-from fastai.metrics import accuracy
-from fastai.callbacks.hooks import *
 import torch
 
 # define some useful types (inspired by fastai)
+# TODO refactor all types into a separate file
 from typing import Union
 from pathlib import Path
 from fastai.vision import ImageDataBunch
-from fastai.basic_train import Learner
-
 PathOrStr = Union[Path, str]
 
 
@@ -54,6 +51,7 @@ class VisualSearchEngine:
         self.last_layer: nn.Module = flatten_model(self.learner.model)[-2]
 
         # Precompute data activations as part of initialization
+        # TODO refactor computation into a separate method?
         self.activations_list = []
         self.last_layer.register_forward_hook(self.hook)
         _ = self.learner.get_preds(data.train_ds)
@@ -87,6 +85,7 @@ class VisualSearchEngine:
         _ = self.learner.predict(img)
         self.query_act = self.activations_list[0]
         # Find distances, sort them
+        # TODO calculate distances in a separate method?
         distances = (self.data_activations - self.query_act).pow(2).sum(dim=1).numpy()
         closest_idxs = distances.argsort()[:num]
         result_itemlist = self.data.train_ds[closest_idxs]
@@ -94,5 +93,20 @@ class VisualSearchEngine:
         return [img for img, label in result_itemlist]
 
 
+def plot_results(imgs: List[Image]) -> None:
+    """
+    Plot closest images.
+
+    .. note:: code inspired by: https://docs.fast.ai/vision.image.html#The-fastai-Image-classes
+
+    :param imgs: list of closest images
+    :return: None
+    """
+    # TODO handle any number of images, not only 16
+    _, axs = plt.subplots(4, 4, figsize=(8, 8))
+    for img, ax in zip(imgs, axs.flatten()):
+        img.show(ax=ax)
+
+
 if __name__ == '__main__':
-    print(Path(__file__))
+    pass
