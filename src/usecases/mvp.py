@@ -1,11 +1,21 @@
-from fastai.vision import *
-import torch
-
-# define some useful types (inspired by fastai)
-# TODO refactor all types into a separate file
-from typing import Union
 from pathlib import Path
+from typing import List
+from typing import Union
+
+from fastai.vision import Image
 from fastai.vision import ImageDataBunch
+from fastai.vision import ImageList
+from fastai.vision import cnn_learner
+from fastai.vision import models
+from fastai.vision import imagenet_stats
+from fastai.torch_core import flatten_model
+import matplotlib.pyplot as plt
+import torch
+from torch import nn
+
+
+# TODO refactor all types into a separate file
+# define some useful types (inspired by fastai)
 PathOrStr = Union[Path, str]
 
 
