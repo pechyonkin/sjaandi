@@ -1,7 +1,4 @@
-# local package
--e .
-
-# external requirements
+-r prod.txt
 click
 Sphinx
 coverage

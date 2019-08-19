@@ -1,0 +1,5 @@
+# local package
+-e .
+matplotlib
+torch
+fastai==1.0.54
