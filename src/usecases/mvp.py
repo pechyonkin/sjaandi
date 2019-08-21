@@ -12,6 +12,7 @@ from fastai.torch_core import flatten_model
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
+from torch import Tensor
 
 
 # TODO refactor all types into a separate file
@@ -40,13 +41,13 @@ def data_for_activations(data_path: PathOrStr, bs: int = 16, img_size: int = 160
     .. note:: `num_workers` anything from 0 crashes on my laptop, ideally, should equal the number of cores of your CPU
     .. note:: all of the data will be used as training set, even images in `valid` folder
     """
-    data = (ImageList.from_folder(data_path)            # -> ImageList
-            .use_partial_data(pct_partial, seed=seed)   # -> ImageList
-            .split_none()                               # -> ItemLists: train and valid ItemList
-            .label_from_folder()                        # -> LabelLists: train and valid LabelList
-            .transform(size=img_size)                   # -> LabelLists: train and valid LabelList
-            .databunch(bs=bs, num_workers=num_workers)  # -> ImageDataBunch
-            .normalize(imagenet_stats))                 # -> ImageDataBunch
+    data: ImageDataBunch = (ImageList.from_folder(data_path)            # -> ImageList
+                            .use_partial_data(pct_partial, seed=seed)   # -> ImageList
+                            .split_none()                               # -> ItemLists: train and valid ItemList
+                            .label_from_folder()                        # -> LabelLists: train and valid LabelList
+                            .transform(size=img_size)                   # -> LabelLists: train and valid LabelList
+                            .databunch(bs=bs, num_workers=num_workers)  # -> ImageDataBunch
+                            .normalize(imagenet_stats))                 # -> ImageDataBunch
 
     # we want the order of images to not be shuffled to be able to find the right images easily
     data.train_dl = data.train_dl.new(shuffle=False)
@@ -62,7 +63,7 @@ class VisualSearchEngine:
 
         # Precompute data activations as part of initialization
         # TODO refactor computation into a separate method?
-        self.activations_list = []
+        self.activations_list: List[Tensor] = []
         self.last_layer.register_forward_hook(self.hook)
         _ = self.learner.get_preds(data.train_ds)
         self.data_activations = torch.cat(self.activations_list)
@@ -73,7 +74,7 @@ class VisualSearchEngine:
     def hook(self, module, input, output) -> None:
         """
         Hook for collecting layer activations.
-        This hook is invoked for each batch forward pass.
+        This hook is invoked for each batch's forward pass.
 
         :param module: layer to which the hook is attached
         :param input: batch input into the layer
@@ -82,7 +83,7 @@ class VisualSearchEngine:
         """
         self.activations_list.append(output)
 
-    def find_closest_images(self, img: Image, num=16) -> List[Image]:
+    def find_closest_images(self, img: Image, num: int = 16) -> List[Image]:
         """
         Return `num` closest images to `img` in activations space.
 
