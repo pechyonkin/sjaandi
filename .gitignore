@@ -1,3 +1,13 @@
+# Ignore rasterfairy symlink
+rasterfairy
+
+# Images
+*.jpg
+*.png
+
+# Notebooks
+*.ipynb
+
 # Ignore fastai-nbstripout config
 .gitconfig
 
