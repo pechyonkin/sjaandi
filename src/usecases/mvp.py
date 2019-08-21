@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+from typing import Tuple
 from typing import Union
 
 from fastai.vision import Image
@@ -10,6 +11,9 @@ from fastai.vision import models
 from fastai.vision import imagenet_stats
 from fastai.torch_core import flatten_model
 import matplotlib.pyplot as plt
+import numpy as np
+import rasterfairy
+from sklearn.manifold import TSNE
 import torch
 from torch import nn
 from torch import Tensor
@@ -51,6 +55,7 @@ def data_for_activations(data_path: PathOrStr, bs: int = 16, img_size: int = 160
 
     # we want the order of images to not be shuffled to be able to find the right images easily
     data.train_dl = data.train_dl.new(shuffle=False)
+    data.img_size = img_size  # data object needs to know its image size
     return data
 
 
@@ -82,6 +87,80 @@ class VisualSearchEngine:
         :return: None
         """
         self.activations_list.append(output)
+
+    @property
+    def data_size(self) -> int:
+        """
+        Calculate number of images in the dataset.
+
+        :return: number of images in the dataset
+        """
+        return len(self.data.train_ds)
+
+    @property
+    def collage_grid_size(self) -> int:
+        """
+        Calculate size of collage grid.
+
+        Collage is a square grid of n by n images.
+        If the size of dataset used for collage is not exactly
+        a square of some integer, then some of the images will
+        not be used in the collage.
+
+        :return: size of the collage grid
+        """
+        return int(np.floor(np.sqrt(self.data_size)))
+
+    @property
+    def collage_data_size(self) -> int:
+        """
+        Calculate number of images needed for collage.
+
+        A square collage of size n needs n**2 images.
+
+        :return: number of images needed for the collage
+        """
+        return self.collage_grid_size**2
+
+    def _get_array_from_image(self, img: Image) -> np.array:
+        """
+        Convert an Image object into numpy array.
+
+        :param img: fastai Image with dimensions: (channels, height, width)
+        :return: numpy array with dimensions: (height, width, channels)
+        """
+        img = img.data.numpy()  # (channels, height, width)
+        img = img.transpose(1, 2, 0)  # (height, width, channels)
+        return img
+
+    def make_collage(self) -> np.array:
+        """
+        Make collage based on activation space visual similarity.
+
+        This method:
+        1. computes t-SNE embeddings
+        2. computes the square grid based on embeddings
+        3. creates the collage array and fills it with images from dataset
+
+        :return: 3-channel array representing square collage image
+        """
+        collage_activations: Tensor = self.data_activations[:self.collage_data_size]
+        # edge case: only 1 image uploaded -> return the image itself
+        if len(collage_activations) == 1:
+            return self._get_array_from_image(self.data.train_ds[0][0])
+        tsne: np.array = TSNE().fit_transform(collage_activations)
+        grid_arrangement: Tuple[int, int] = (self.collage_grid_size, self.collage_grid_size)
+        grid_xy, _ = rasterfairy.transformPointCloud2D(tsne, target=grid_arrangement)
+        collage_size: int = self.collage_grid_size * self.data.img_size
+        collage = np.zeros([collage_size, collage_size, 3])  # empty collage
+        for i in range(self.collage_data_size):
+            row, col = map(int, grid_xy[i])  # grid is float, but need ints to index
+            up = row * self.data.img_size
+            down = (row + 1) * self.data.img_size
+            left = col * self.data.img_size
+            right = (col + 1) * self.data.img_size
+            collage[up:down, left:right] = self._get_array_from_image(self.data.train_ds[i][0])
+        return collage
 
     def find_closest_images(self, img: Image, num: int = 16) -> List[Image]:
         """
