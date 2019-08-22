@@ -148,13 +148,17 @@ class VisualSearchEngine:
         # edge case: only 1 image uploaded -> return the image itself
         if len(collage_activations) == 1:
             return self._get_array_from_image(self.data.train_ds[0][0])
+
+        # prepare the grid
         tsne: np.array = TSNE().fit_transform(collage_activations)
         grid_arrangement: Tuple[int, int] = (self.collage_grid_size, self.collage_grid_size)
         grid_xy, _ = rasterfairy.transformPointCloud2D(tsne, target=grid_arrangement)
-        collage_size: int = self.collage_grid_size * self.data.img_size
+
+        # create the collage
+        collage_size = self.collage_grid_size * self.data.img_size
         collage = np.zeros([collage_size, collage_size, 3])  # empty collage
         for i in range(self.collage_data_size):
-            row, col = map(int, grid_xy[i])  # grid is float, but need ints to index
+            row, col = map(int, grid_xy[i])  # grid has floats, but need ints to index
             up = row * self.data.img_size
             down = (row + 1) * self.data.img_size
             left = col * self.data.img_size
