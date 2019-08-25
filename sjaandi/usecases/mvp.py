@@ -24,8 +24,8 @@ from torch import Tensor
 PathOrStr = Union[Path, str]
 
 
-def data_for_activations(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partial: float = 1.0,
-                         num_workers: int = 0, seed: int = 42) -> ImageDataBunch:
+def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partial: float = 1.0,
+             num_workers: int = 0, seed: int = 42) -> ImageDataBunch:
     """
     Create data object from Imagenet-style directory structure.
 
@@ -60,9 +60,9 @@ def data_for_activations(data_path: PathOrStr, bs: int = 16, img_size: int = 160
 
 
 class VisualSearchEngine:
-    def __init__(self, data: ImageDataBunch):
+    def __init__(self, data_path: PathOrStr, **kwargs):
         # Create data and learner
-        self.data = data
+        self.data: ImageDataBunch = get_data(data_path, **kwargs)
         self.learner = cnn_learner(self.data, models.resnet18)
         self.last_layer: nn.Module = flatten_model(self.learner.model)[-2]
 
@@ -70,7 +70,7 @@ class VisualSearchEngine:
         # TODO refactor computation into a separate method?
         self.activations_list: List[Tensor] = []
         self.last_layer.register_forward_hook(self.hook)
-        _ = self.learner.get_preds(data.train_ds)
+        _ = self.learner.get_preds(self.data.train_ds)
         self.data_activations = torch.cat(self.activations_list)
 
         # This will store activations for query image
