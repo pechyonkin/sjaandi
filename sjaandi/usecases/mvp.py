@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 from typing import Tuple
@@ -22,6 +23,18 @@ from torch import Tensor
 # TODO refactor all types into a separate file
 # define some useful types (inspired by fastai)
 PathOrStr = Union[Path, str]
+
+
+class NonExistentPathError(Exception):
+    pass
+
+
+class EmptyFolderError(Exception):
+    pass
+
+
+class PathIsNotFolderError(Exception):
+    pass
 
 
 def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partial: float = 1.0,
@@ -60,8 +73,9 @@ def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partia
 
 
 class VisualSearchEngine:
-    def __init__(self, data_path: PathOrStr, **kwargs):
+    def __init__(self, data_path: str, **kwargs):
         # Create data and learner
+        self._validate_path(data_path)
         self.data: ImageDataBunch = get_data(data_path, **kwargs)
         self.learner = cnn_learner(self.data, models.resnet18)
         self.last_layer: nn.Module = flatten_model(self.learner.model)[-2]
@@ -75,6 +89,17 @@ class VisualSearchEngine:
 
         # This will store activations for query image
         self.query_act = None
+
+    def _validate_path(self, path: str):
+        # Handle non-existent path
+        if not os.path.exists(path):
+            raise NonExistentPathError("Data path doesn't exist! Can't initialize the engine.")
+        # Handle path not a dir case
+        if not os.path.isdir(path):
+            raise PathIsNotFolderError("The path is not a folder! Can't initialize the engine.")
+        # Handle empty folder path
+        if not os.listdir(path):
+            raise EmptyFolderError("The folder is empty! Can't initialize the engine.")
 
     def hook(self, module, input, output) -> None:
         """
