@@ -63,6 +63,7 @@ def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partia
     .. note:: `num_workers` anything from 0 crashes on my laptop, ideally, should equal the number of cores of your CPU
     .. note:: all of the data will be used as training set, even images in `valid` folder
     """
+
     data: ImageDataBunch = (ImageList.from_folder(data_path)            # -> ImageList
                             .use_partial_data(pct_partial, seed=seed)   # -> ImageList
                             .split_none()                               # -> ItemLists: train and valid ItemList
@@ -106,23 +107,27 @@ class VisualSearchEngine:
         :param image_path: path to the image
         :return: None
         """
+
         with open(image_path) as f:
             try:
                 img = PILImage.open(f)
                 img.verify()
             except Exception:
-                raise InvalidImageError("""You have corrupt images / non-image files.""")
+                raise InvalidImageError("You have corrupt images / non-image files.")
 
     def _validate_path(self, path: str):
         # Handle non-existent path
         if not os.path.exists(path):
             raise NonExistentPathError("Data path doesn't exist! Can't initialize the engine.")
+
         # Handle path not a dir case
         if not os.path.isdir(path):
             raise PathIsNotFolderError("The path is not a folder! Can't initialize the engine.")
+
         # Handle empty folder path
         if not os.listdir(path):
             raise EmptyFolderError("The folder is empty! Can't initialize the engine.")
+
         # Validate images, throw error if any problem
         for file_name in os.listdir(path):
             full_path = os.path.join(path, file_name)
@@ -138,6 +143,7 @@ class VisualSearchEngine:
         :param output: batch output of the layer
         :return: None
         """
+
         self.activations_list.append(output)
 
     @property
@@ -147,6 +153,7 @@ class VisualSearchEngine:
 
         :return: number of images in the dataset
         """
+
         return len(self.data.train_ds)
 
     @property
@@ -161,6 +168,7 @@ class VisualSearchEngine:
 
         :return: size of the collage grid
         """
+
         return int(np.floor(np.sqrt(self.data_size)))
 
     @property
@@ -172,6 +180,7 @@ class VisualSearchEngine:
 
         :return: number of images needed for the collage
         """
+
         return self.collage_grid_size**2
 
     def _get_array_from_image(self, img: Image) -> np.array:
@@ -181,6 +190,7 @@ class VisualSearchEngine:
         :param img: fastai Image with dimensions: (channels, height, width)
         :return: numpy array with dimensions: (height, width, channels)
         """
+
         img = img.data.numpy()  # (channels, height, width)
         img = img.transpose(1, 2, 0)  # (height, width, channels)
         return img
@@ -196,7 +206,9 @@ class VisualSearchEngine:
 
         :return: 3-channel array representing square collage image
         """
+
         collage_activations: Tensor = self.data_activations[:self.collage_data_size]
+
         # edge case: only 1 image uploaded -> return the image itself
         if len(collage_activations) == 1:
             return self._get_array_from_image(self.data.train_ds[0][0])
@@ -226,15 +238,18 @@ class VisualSearchEngine:
         :param num: number of closest images to return
         :return: list of `num` closest images
         """
+
         # Compute activation for query image
         self.activations_list = []
         _ = self.learner.predict(img)
         self.query_act = self.activations_list[0]
+
         # Find distances, sort them
         # TODO calculate distances in a separate method?
         distances = (self.data_activations - self.query_act).pow(2).sum(dim=1).numpy()
         closest_idxs = distances.argsort()[:num]
         result_itemlist = self.data.train_ds[closest_idxs]
+
         # Only return images, ignore the labels
         return [img for img, label in result_itemlist]
 
@@ -248,6 +263,7 @@ def plot_results(imgs: List[Image]) -> None:
     :param imgs: list of closest images
     :return: None
     """
+
     # TODO handle any number of images, not only 16
     _, axs = plt.subplots(4, 4, figsize=(8, 8))
     for img, ax in zip(imgs, axs.flatten()):
