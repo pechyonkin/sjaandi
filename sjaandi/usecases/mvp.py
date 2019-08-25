@@ -13,6 +13,7 @@ from fastai.vision import imagenet_stats
 from fastai.torch_core import flatten_model
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image as PILImage
 import rasterfairy
 from sklearn.manifold import TSNE
 import torch
@@ -34,6 +35,10 @@ class EmptyFolderError(Exception):
 
 
 class PathIsNotFolderError(Exception):
+    pass
+
+
+class InvalidImageError(Exception):
     pass
 
 
@@ -90,6 +95,24 @@ class VisualSearchEngine:
         # This will store activations for query image
         self.query_act = None
 
+    def _validate_image(self, image_path: str):
+        """
+        Validate image, raise exception if any problem.
+        Potential problems:
+         - corrupt images
+         - non-image files
+         - non-image files disguised as images
+
+        :param image_path: path to the image
+        :return: None
+        """
+        with open(image_path) as f:
+            try:
+                img = PILImage.open(f)
+                img.verify()
+            except Exception:
+                raise InvalidImageError("""You have corrupt images / non-image files.""")
+
     def _validate_path(self, path: str):
         # Handle non-existent path
         if not os.path.exists(path):
@@ -100,6 +123,10 @@ class VisualSearchEngine:
         # Handle empty folder path
         if not os.listdir(path):
             raise EmptyFolderError("The folder is empty! Can't initialize the engine.")
+        # Validate images, throw error if any problem
+        for file_name in os.listdir(path):
+            full_path = os.path.join(path, file_name)
+            self._validate_image(full_path)
 
     def hook(self, module, input, output) -> None:
         """
