@@ -5,9 +5,10 @@ with open('README.md') as f:
 
 setuptools.setup(
     name='sjaandi',
-    version='0.1',
+    version='0.1.1',
     scripts=None,
     author='Max Pechyonkin',
+    author_email='maxim.pechyonkin@gmail.com',
     description='Library for visual similarity search and visualization',
     # long_description=long_description,
     # long_description_content_type='text/markdown',
@@ -20,7 +21,7 @@ setuptools.setup(
         'scikit-learn',
         'python-dotenv',
         'click',
-        'rasterfairy @ git+git://github.com/pechyonkin/RasterFairy@python3',
+        'rasterfairy-py3',
     ],
     license='MIT',
     classifiers=[
