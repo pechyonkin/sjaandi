@@ -21,7 +21,7 @@ from torch import nn
 from torch import Tensor
 
 
-# TODO refactor all types into a separate file
+# TODO refactor all types and errors into a separate file
 # define some useful types (inspired by fastai)
 PathOrStr = Union[Path, str]
 
@@ -79,6 +79,18 @@ def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partia
 
 
 class VisualSearchEngine:
+    """
+    Deep-learning based visual similarity search and clustering.
+
+    Visual similarity is defined as L2 distance in embedding space of last fully connected
+    layer of a neural network.
+
+    Supported use cases:
+        - given a query image, find visually most similar images
+        - given a set of images, arrange them into a collage where images are grouped in
+          terms of visual similarity
+    """
+
     def __init__(self, data_path: str, **kwargs):
         # Create data and learner
         self._validate_path(data_path)
@@ -108,28 +120,46 @@ class VisualSearchEngine:
         :return: None
         """
 
-        with open(image_path) as f:
-            try:
-                img = PILImage.open(f)
-                img.verify()
-            except Exception:
-                raise InvalidImageError("You have corrupt images / non-image files.")
+        try:
+            img = PILImage.open(image_path)
+            img.verify()
+        except Exception:
+            raise InvalidImageError(f"Corrupt image / non-image file: {image_path}\nAborting.")
 
     def _validate_path(self, path: str):
+        """
+        Validate the path and images have no problems.
+
+        Handles and raises in the following cases:
+        - non-existent path
+        - path is not a directory
+        - empty folder
+        - folder only has hidden images
+        - images are corrupt
+        - non-image files are present
+        - non-image files are present that have image extension
+
+        :param path: path to the folder with images to validate
+        """
+
+        # TODO: handle recursive Imagenet-style folder structure validation (irrelevant for current use case)
         # Handle non-existent path
         if not os.path.exists(path):
-            raise NonExistentPathError("Data path doesn't exist! Can't initialize the engine.")
+            raise NonExistentPathError(f"Provided path doesn't exist: {path}\nCan't initialize the engine.")
 
         # Handle path not a dir case
         if not os.path.isdir(path):
-            raise PathIsNotFolderError("The path is not a folder! Can't initialize the engine.")
+            raise PathIsNotFolderError(f"Provided path is not a folder: {path}\nCan't initialize the engine.")
 
-        # Handle empty folder path
-        if not os.listdir(path):
-            raise EmptyFolderError("The folder is empty! Can't initialize the engine.")
+        # Collect filenames, ignore hidden files (starting with the dot)
+        file_names = [name for name in os.listdir(path) if not name.startswith('.') and os.path.isfile(os.path.join(path, name))]
+
+        # Handle empty folder path, or folder with only hidden files
+        if not file_names:
+            raise EmptyFolderError(f"Provided folder is empty: {path}\nCan't initialize the engine.")
 
         # Validate images, throw error if any problem
-        for file_name in os.listdir(path):
+        for file_name in file_names:
             full_path = os.path.join(path, file_name)
             self._validate_image(full_path)
 

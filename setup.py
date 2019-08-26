@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setuptools.setup(
     name='sjaandi',
-    version='0.1.1',
+    version='0.1.3',
     scripts=None,
     author='Max Pechyonkin',
     author_email='maxim.pechyonkin@gmail.com',
