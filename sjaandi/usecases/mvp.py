@@ -7,6 +7,7 @@ from typing import Union
 from fastai.vision import Image
 from fastai.vision import ImageDataBunch
 from fastai.vision import ImageList
+from fastai.vision import LabelLists
 from fastai.vision import cnn_learner
 from fastai.vision import models
 from fastai.vision import imagenet_stats
@@ -64,13 +65,20 @@ def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partia
     .. note:: all of the data will be used as training set, even images in `valid` folder
     """
 
-    data: ImageDataBunch = (ImageList.from_folder(data_path)            # -> ImageList
-                            .use_partial_data(pct_partial, seed=seed)   # -> ImageList
-                            .split_none()                               # -> ItemLists: train and valid ItemList
-                            .label_from_folder()                        # -> LabelLists: train and valid LabelList
-                            .transform(size=img_size)                   # -> LabelLists: train and valid LabelList
-                            .databunch(bs=bs, num_workers=num_workers)  # -> ImageDataBunch
-                            .normalize(imagenet_stats))                 # -> ImageDataBunch
+    label_lists: LabelLists = (ImageList.from_folder(data_path)            # -> ImageList
+                               .use_partial_data(pct_partial, seed=seed)   # -> ImageList
+                               .split_none()                               # -> ItemLists: train and valid ItemList
+                               .label_from_folder()                        # -> LabelLists: train and valid LabelList
+                               .transform(size=img_size))
+
+    # handle the case when number of images is too small - fastai gives warning and throws error when showing batch
+    n_images = len(label_lists.train)
+    if n_images < bs:
+        print(f"Too few images. Decreasing batch size from {bs} to {n_images}.")
+        bs = n_images
+
+    data: ImageDataBunch = (label_lists.databunch(bs=bs, num_workers=num_workers)  # -> ImageDataBunch
+                            .normalize(imagenet_stats))                            # -> ImageDataBunch
 
     # we want the order of images to not be shuffled to be able to find the right images easily
     data.train_dl = data.train_dl.new(shuffle=False)
