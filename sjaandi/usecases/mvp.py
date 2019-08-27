@@ -43,6 +43,10 @@ class InvalidImageError(Exception):
     pass
 
 
+class InvalidParameterValueError(Exception):
+    pass
+
+
 def get_data(data_path: PathOrStr, bs: int = 16, img_size: int = 160, pct_partial: float = 1.0,
              num_workers: int = 0, seed: int = 42) -> ImageDataBunch:
     """
