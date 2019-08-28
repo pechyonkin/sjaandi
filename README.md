@@ -1,4 +1,4 @@
-sjaandi
+sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master)
 ==============================
 
  Library for visualizing and understanding predictions of convolutional neural networks.
