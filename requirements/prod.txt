@@ -1,5 +1,11 @@
 # local package
 -e .
 matplotlib
-torch
-fastai==1.0.54
+torch==1.2.0
+torchvision==0.4.0
+fastai==1.0.57
+numpy
+scikit-learn
+rasterfairy-py3
+pytest
+
