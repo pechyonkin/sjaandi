@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setuptools.setup(
     name='sjaandi',
-    version='0.1.4',
+    version='0.1.6',
     scripts=None,
     author='Max Pechyonkin',
     author_email='maxim.pechyonkin@gmail.com',
@@ -15,7 +15,9 @@ setuptools.setup(
     url='https://github.com/pechyonkin/sjaandi',
     packages=setuptools.find_packages(),
     install_requires=[
-        'fastai',
+        'torch>=1.2.0',
+        'torchvision>=0.4.0',
+        'fastai>=1.0.57',
         'matplotlib',
         'numpy',
         'scikit-learn',
