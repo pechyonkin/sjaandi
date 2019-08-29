@@ -8,7 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: pechyonkin/docker-sjaandi
+      - image: circleci/python:3.6-buster
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -25,6 +25,12 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "requirements/prod.txt" }}
             # no fallback
+      - run:
+          name: install pre-dependencies
+          command: |
+            apt-get -y install libc-dev
+            apt-get -y install build-essential
+            pip install -U pip
 
       - run:
           name: install dependencies
@@ -39,16 +45,11 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements/prod.txt" }}
 
       # run tests!
-      # this example uses Django's built-in test-runner
-      # other common Python testing frameworks include pytest and nose
-      # https://pytest.org
-      # https://nose.readthedocs.io
       - run:
           name: run tests
           command: |
             . venv/bin/activate
             python -m pytest tests/
-#            python manage.py test
 
       - store_artifacts:
           path: test-reports
@@ -59,4 +60,3 @@ workflows:
   build_workflow:
     jobs:
       - build
-# change is here
