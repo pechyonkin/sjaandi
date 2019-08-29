@@ -28,9 +28,9 @@ jobs:
       - run:
           name: install pre-dependencies
           command: |
-            apt-get -y install libc-dev
-            apt-get -y install build-essential
-            pip install -U pip
+            sudo apt-get -y install libc-dev
+            sudo apt-get -y install build-essential
+            sudo pip install -U pip
 
       - run:
           name: install dependencies
