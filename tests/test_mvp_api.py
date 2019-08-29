@@ -37,7 +37,7 @@ def save_random_image(full_name: str,
     try:
         imageio.imsave(full_name, img)
     except ValueError:
-        print(f"Filename wrong extension: {full_name}")
+        print(f"Filename has wrong extension: {full_name}")
     except FileNotFoundError:
         print(f"Directory doesn't exist: {full_name}")
 
@@ -248,17 +248,41 @@ class TestInvalidDataPath:
 
 
 class TestWorksWithActualImages:
+    """
+    VisualSearchEngine should work properly with different number of images and sizes.
+    """
+
     def test_api_works_with_actual_images_of_greater_size(self, valid_large_random_images):
+        """
+        Test with images that need to be resized down.
+        """
+
         collage = VisualSearchEngine(valid_large_random_images).make_collage()
 
     def test_api_works_with_actual_images_of_smaller_size(self, valid_small_random_images):
+        """
+        Test with images that need to be resized up.
+        """
+
         collage = VisualSearchEngine(valid_small_random_images).make_collage()
 
     def test_api_works_with_four_channel_images(self, valid_random_four_channel_images):
+        """
+        Test with images that have four channels.
+        """
+
         collage = VisualSearchEngine(valid_random_four_channel_images).make_collage()
 
     def test_api_works_with_one_channel_images(self, valid_random_one_channel_images):
+        """
+        Test with images that have one channel.
+        """
+
         collage = VisualSearchEngine(valid_random_one_channel_images).make_collage()
 
     def test_api_works_with_one_image(self, valid_random_one_image):
+        """
+        Test with one image (edge case).
+        """
+
         collage = VisualSearchEngine(valid_random_one_image).make_collage()
