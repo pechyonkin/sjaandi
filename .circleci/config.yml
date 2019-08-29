@@ -23,7 +23,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "requirements/prod.txt" }}
+            - v4-dependencies-{{ checksum "requirements/prod.txt" }}
             # no fallback
       - run:
           name: install pre-dependencies
@@ -42,14 +42,16 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v2-dependencies-{{ checksum "requirements/prod.txt" }}
+          key: v4-dependencies-{{ checksum "requirements/prod.txt" }}
 
       # run tests!
       - run:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m pytest tests/
+            coverage run --source=./sjaandi -m pytest tests/
+            coverage xml
+            coveralls
 
       - store_artifacts:
           path: test-reports
