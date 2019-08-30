@@ -1,4 +1,4 @@
-sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=coverage)](https://coveralls.io/github/pechyonkin/sjaandi?branch=coverage)
+sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=master)](https://coveralls.io/github/pechyonkin/sjaandi?branch=master)
 ==============================
 
  Library for visualizing and understanding predictions of convolutional neural networks.
