@@ -1,19 +1,43 @@
-sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=master)](https://coveralls.io/github/pechyonkin/sjaandi?branch=master)
+Sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=master)](https://coveralls.io/github/pechyonkin/sjaandi?branch=master)
 ==============================
 
- Library for visualizing and understanding predictions of convolutional neural networks.
+Use your images to create collages based on visual similarity, where similar images are located close to each other, like in the example below:
 
+![Example](figures/example.png)
 
-## Getting the Data
+**Note:** This work was inspired by Andrej Karpathy's [visualizations](https://cs.stanford.edu/people/karpathy/cnnembed/) of ImageNet dataset.
 
-Download [Imagenette-160]() using the following shell command:
+## 1. Installation
+
+Sjaandi is [available](https://pypi.org/project/sjaandi/) for installation using pip:
+
+```pip install sjaandi```
+
+## 2. Using the Library
+
+All you need is to have all images for collage in one folder, and use that path as input to `VisualSearchEngine()`:
 
 ```python
-python src/data/get_imagenette.py
+from sjaandi import VisualSearchEngine
+
+DATA_PATH = # path to the folder with images
+
+collage = VisualSearchEngine(DATA_PATH).make_collage()
 ```
 
-The data will be available in `data/raw/imagenette-160/`.
+The collage will be a square, two-dimensional grid of square images. If the number of pictures in your folder is not a square of some number, some photos will not end up in the collage. For example, if you provide 50 images, you will get a 7-by-7 collage having 49 images, which means 1 of the pictures of the 50 will not be included.
 
---------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>.</small></p>
+
+## 3. Technical Details
+
+Underneath the hood, this library puts your images through a neural network and collects high dimensional activations. The activations are mapped to a two-dimensional Cartesional space using the t-SNE algorithm. The next step is to transform the t-SNE coordinates into a square lattice of coordinates. Finally, your images are laid out at lattice coordinates to produce the final image.
+
+
+### Main Dependencies:
+
+- python 3.6
+- [fastai](https://docs.fast.ai/)
+- [pytorch](https://pytorch.org/)
+- [scikit-learn](https://scikit-learn.org/)
+- [rasterfairy-py3](https://github.com/pechyonkin/RasterFairy-Py3)
