@@ -1,4 +1,4 @@
-Sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=master)](https://coveralls.io/github/pechyonkin/sjaandi?branch=master)
+Sjaandi [![CircleCI](https://circleci.com/gh/pechyonkin/sjaandi/tree/master.svg?style=svg)](https://circleci.com/gh/pechyonkin/sjaandi/tree/master) [![Coverage Status](https://coveralls.io/repos/github/pechyonkin/sjaandi/badge.svg?branch=master)](https://coveralls.io/github/pechyonkin/sjaandi?branch=master) [![PyPI](https://img.shields.io/pypi/v/sjaandi)](https://pypi.org/project/sjaandi/) ![Python](https://img.shields.io/badge/python-3.6-blue) [![License](https://img.shields.io/badge/Licence-MIT-lightgrey)](https://github.com/pechyonkin/sjaandi/blob/master/LICENSE)
 ==============================
 
 Use your images to create collages based on visual similarity, where similar images are located close to each other, like in the example below:
